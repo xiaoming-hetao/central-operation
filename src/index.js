@@ -1,13 +1,25 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
+import App from './App'
+import { HashRouter as Router } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { createStore } from 'redux';
+import appData from './store/reducers';
 
+// 创建store
+let store = createStore(appData);
+console.log(store.getState());
+// Prodiver组件可以让所有容器组件都可以访问store
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  
+    <Provider store={store}>
+      <Router>
+      <App />
+      </Router>
+    </Provider>
+  ,
   document.getElementById('root')
 );
 
