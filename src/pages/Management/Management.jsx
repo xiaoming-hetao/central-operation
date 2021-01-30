@@ -66,15 +66,16 @@ class Management extends Component {
 
     // 连接测试
     handleLink = () => {
+        this.setState({
+            connectLoading: true,
+        });
         let linkData = {
             ip: this.state.formpcIP,
             port: this.state.pcPort,
             user: this.state.loginName,
             pass: this.state.loginPassword,
         };
-        this.setState({
-            connectLoading: true,
-        });
+
         requestMethod({
             url: "/ping",
             method: "post",
