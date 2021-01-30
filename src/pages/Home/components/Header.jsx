@@ -10,7 +10,7 @@ class HomeHeader extends Component {
         this.state = {
             user: this.props.user,
         };
-        console.log("header");
+
         // this.checkUser.bind(this);
     }
 
@@ -21,7 +21,6 @@ class HomeHeader extends Component {
     //         // this.props.history.push("/login");
     //     }
     // }
-    componentDidMount() {}
 
     render() {
         // 下拉菜单
@@ -30,6 +29,7 @@ class HomeHeader extends Component {
                 <Menu.Item>退出</Menu.Item>
             </Menu>
         );
+        const user = this.state.user;
         return (
             <div className="container">
                 <div className="container-left">
@@ -51,7 +51,7 @@ class HomeHeader extends Component {
                     >
                         <Dropdown overlay={menu} arrow>
                             <span>
-                                {this.state.user} <DownOutlined />
+                                {user} <DownOutlined />
                             </span>
                         </Dropdown>
                     </div>
