@@ -1,5 +1,15 @@
 import React, { Component } from "react";
-import { Tag, Divider, List, Button, Space, Select, message } from "antd";
+import {
+    Tag,
+    Divider,
+    List,
+    Button,
+    Space,
+    Select,
+    message,
+    Modal,
+    Table,
+} from "antd";
 import requestMethod from "../../../utils/request";
 
 const { Option } = Select;
@@ -11,6 +21,9 @@ class MonitorHeader extends Component {
             total: 0,
             pcStateData: [],
             pcIPSelected: "",
+            detailModalVisible: false,
+            settingModalVisible: false,
+            pcData: [],
         };
     }
 
@@ -48,19 +61,98 @@ class MonitorHeader extends Component {
                 pcStateData: data,
             });
         });
+
+        requestMethod({
+            url: "/getHosts",
+            method: "get",
+        }).then((res) => {
+            const data = res.data.data;
+            let handleData = [];
+            // 数据表格要求每个数据项都要有一个key
+            for (let i = 0; i < data.length; i++) {
+                handleData.push({ key: i, ...data[i] });
+            }
+            this.setState({
+                pcData: handleData,
+            });
+        });
     }
 
     render() {
-        const { total, pcStateData } = this.state;
+        const {
+            total,
+            pcStateData,
+            detailModalVisible,
+            settingModalVisible,
+            pcData,
+        } = this.state;
+        const columns = [
+            {
+                title: "设备名称",
+                dataIndex: "pcName",
+                key: "pcName",
+            },
+            {
+                title: "设备ip",
+                dataIndex: "pcIP",
+                key: "pcIP",
+            },
+            {
+                title: "主要问题",
+                key: "mainProblem",
+                dataIndex: "mainProblem",
+            },
+        ];
         return (
             <div>
+                <Modal
+                    visible={detailModalVisible}
+                    title="设备详情"
+                    centered="true"
+                    onCancel={() => {
+                        this.setState({ detailModalVisible: false });
+                    }}
+                    footer={null}
+                >
+                    <Table
+                        columns={columns}
+                        dataSource={pcData}
+                        bordered="true"
+                    />
+                </Modal>
+
+                <Modal
+                    visible={settingModalVisible}
+                    title="监控阈值设置"
+                    centered="true"
+                    onCancel={() => {
+                        this.setState({ settingModalVisible: false });
+                    }}
+                    footer={null}
+                >
+                    <Table
+                        columns={columns}
+                        dataSource={pcData}
+                        bordered="true"
+                    />
+                </Modal>
+
                 <Tag color="processing">设备概况</Tag>
                 <List
                     header={<div>本平台共管理 {total} 设备</div>}
                     footer={
                         <div>
                             <Space size="middle">
-                                <Button type="primary">查看详情</Button>
+                                <Button
+                                    type="primary"
+                                    onClick={() => {
+                                        this.setState({
+                                            detailModalVisible: true,
+                                        });
+                                    }}
+                                >
+                                    查看详情
+                                </Button>
                                 <Button type="primary">监控设置</Button>
                             </Space>
                         </div>
