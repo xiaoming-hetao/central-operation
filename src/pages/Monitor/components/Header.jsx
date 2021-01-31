@@ -10,6 +10,7 @@ import {
     Modal,
     Table,
 } from "antd";
+import EditableTable from "../../../components/Modal/ThresholdSetting";
 import requestMethod from "../../../utils/request";
 
 const { Option } = Select;
@@ -23,9 +24,42 @@ class MonitorHeader extends Component {
             pcIPSelected: "",
             detailModalVisible: false,
             settingModalVisible: false,
+            editLoading: false,
             pcData: [],
+            yuzhiData: [],
         };
     }
+
+    // 从子组件EditableTable接收修改后的阈值数据
+    handleEdit = (data) => {
+        this.setState({
+            yuzhiData: data,
+        });
+    };
+    // 执行真正的修改逻辑
+    handleUpdate = () => {
+        this.setState({ editLoading: true });
+        if (this.state.yuzhiData.length) {
+            //如果修改值不为空
+            let postData = this.state.yuzhiData;
+            requestMethod({
+                url: "/updateThreshold",
+                method: "post",
+                data: postData,
+            }).then((res) => {
+                if (res.data === 0) {
+                    message.success("修改成功");
+                } else {
+                    message.success("修改失败");
+                }
+            });
+            this.setState({ settingModalVisible: false });
+        } else {
+            //如果用户没有修改值，则给出提示
+            message.info("请先编辑值或先保存值再点击修改");
+        }
+        this.setState({ editLoading: false });
+    };
 
     onChange = (value) => {
         this.setState({
@@ -84,9 +118,11 @@ class MonitorHeader extends Component {
             pcStateData,
             detailModalVisible,
             settingModalVisible,
+            editLoading,
             pcData,
         } = this.state;
-        const columns = [
+
+        const detailModalColumns = [
             {
                 title: "设备名称",
                 dataIndex: "pcName",
@@ -103,6 +139,7 @@ class MonitorHeader extends Component {
                 dataIndex: "mainProblem",
             },
         ];
+
         return (
             <div>
                 <Modal
@@ -115,7 +152,7 @@ class MonitorHeader extends Component {
                     footer={null}
                 >
                     <Table
-                        columns={columns}
+                        columns={detailModalColumns}
                         dataSource={pcData}
                         bordered="true"
                     />
@@ -128,13 +165,27 @@ class MonitorHeader extends Component {
                     onCancel={() => {
                         this.setState({ settingModalVisible: false });
                     }}
-                    footer={null}
+                    width={720}
+                    footer={[
+                        <Button
+                            key="back"
+                            onClick={() => {
+                                this.setState({ settingModalVisible: false });
+                            }}
+                        >
+                            取消
+                        </Button>,
+                        <Button
+                            key="submit"
+                            type="primary"
+                            loading={editLoading}
+                            onClick={this.handleUpdate}
+                        >
+                            修改
+                        </Button>,
+                    ]}
                 >
-                    <Table
-                        columns={columns}
-                        dataSource={pcData}
-                        bordered="true"
-                    />
+                    <EditableTable onEdit={this.handleEdit} />
                 </Modal>
 
                 <Tag color="processing">设备概况</Tag>
@@ -153,7 +204,16 @@ class MonitorHeader extends Component {
                                 >
                                     查看详情
                                 </Button>
-                                <Button type="primary">监控设置</Button>
+                                <Button
+                                    type="primary"
+                                    onClick={() => {
+                                        this.setState({
+                                            settingModalVisible: true,
+                                        });
+                                    }}
+                                >
+                                    监控设置
+                                </Button>
                             </Space>
                         </div>
                     }
